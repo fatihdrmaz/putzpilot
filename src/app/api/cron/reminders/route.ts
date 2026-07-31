@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendWhatsAppTemplate } from "@/lib/notifications";
 
-// Vercel Cron (ör. */10 dakikada bir):
+// Vercel Cron.
+// NOT (Hobby planı): cron günde 1 kez çalışır (vercel.json: "0 5 * * *").
+// 2. iş (süresi geçmiş açık işleri kapatma) günlükle uyumlu. Ancak 1. iş
+// (sürenin ~%75'inde kontrol mesajı) sub-saat hassasiyet ister; günlük cronla
+// pratikte tetiklenmez. Pro plana geçince schedule'ı "*/10 * * * *" yap veya
+// checkpoint'i ayrı bir tetikleyiciyle (ör. Supabase Edge Function timer) çöz.
 // 1) Devam eden işlerde sürenin ~%75'i geçtiyse müşteriye kontrol mesajı
 // 2) Başlangıç saatine kadar atanamamış işlerde otomatik %100 iade (Bölüm 11.4 → cancel API'si platform kuralıyla)
 export async function GET(request: NextRequest) {
