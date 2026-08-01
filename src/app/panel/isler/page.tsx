@@ -1,6 +1,7 @@
 "use client";
 
 // Açık işler (mockup adım 5-6) — maskelenmiş adres + İşi Al → rezervasyon ücreti.
+// Açık tema, masaüstünde 2 sütun grid.
 import { useEffect, useState } from "react";
 import { useLang } from "../lang-context";
 import { IconMapPin, IconClock, IconCalendar } from "@/components/icons";
@@ -87,74 +88,76 @@ export default function OpenJobsPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-xl font-extrabold">{dict.jobs.openJobs}</h1>
+      <h1 className="text-2xl font-extrabold text-ink">{dict.jobs.openJobs}</h1>
       {error && <Banner tone="error">{error}</Banner>}
 
       {jobs === null && !error && (
-        <div className="flex flex-col gap-3">
+        <div className="grid gap-3 md:grid-cols-2">
           {[1, 2].map((i) => (
-            <div key={i} className="h-36 animate-pulse rounded-2xl bg-white/5" />
+            <div key={i} className="h-40 animate-pulse rounded-2xl bg-ink/5" />
           ))}
         </div>
       )}
 
       {jobs?.length === 0 && (
-        <p className="rounded-2xl bg-white/5 p-6 text-center text-sm text-white/60">
+        <p className="rounded-2xl border border-ink/10 bg-white p-8 text-center text-sm text-ink/55">
           {lang === "tr" ? "Şu anda açık iş yok. Daha sonra tekrar bakın." : "Derzeit keine offenen Aufträge. Schauen Sie später wieder vorbei."}
         </p>
       )}
 
-      {jobs?.map((job) => (
-        <article key={job.id} className="rounded-2xl bg-white/5 p-4">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="flex items-center gap-1.5 text-sm font-bold">
-                <IconCalendar size={16} className="text-brand" />
-                {new Date(job.scheduled_date).toLocaleDateString(lang === "tr" ? "tr-TR" : "de-DE", { day: "numeric", month: "long" })}
-                , {job.start_time.slice(0, 5)}
-              </p>
-              <p className="mt-0.5 flex items-center gap-1.5 text-xs text-white/60">
-                <IconClock size={14} />
-                {job.duration_hours} {dict.jobs.hours} — {typeLabel(job.cleaning_type)}
+      <div className="grid gap-3 md:grid-cols-2">
+        {jobs?.map((job) => (
+          <article key={job.id} className="flex flex-col rounded-2xl border border-ink/10 bg-white p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="flex items-center gap-1.5 text-sm font-bold text-ink">
+                  <IconCalendar size={16} className="text-brand-dark" />
+                  {new Date(job.scheduled_date).toLocaleDateString(lang === "tr" ? "tr-TR" : "de-DE", { day: "numeric", month: "long" })}
+                  , {job.start_time.slice(0, 5)}
+                </p>
+                <p className="mt-0.5 flex items-center gap-1.5 text-xs text-ink/55">
+                  <IconClock size={14} />
+                  {job.duration_hours} {dict.jobs.hours} — {typeLabel(job.cleaning_type)}
+                </p>
+              </div>
+              <p className="text-xl font-extrabold tabular-nums text-ink">
+                {Number(job.total_price).toFixed(0)} €
               </p>
             </div>
-            <p className="text-xl font-extrabold tabular-nums text-brand">
-              {Number(job.total_price).toFixed(0)} €
-            </p>
-          </div>
 
-          <p className="mt-3 flex items-center gap-1.5 text-sm text-white/80">
-            <IconMapPin size={16} className="text-brand" />
-            {job.postal_prefix} {job.city}
-            {job.district ? ` — ${job.district}` : ""}
-            {job.approx_distance_km != null && (
-              <span className="text-white/50">· ~{job.approx_distance_km} km</span>
-            )}
-          </p>
-          <p className="mt-1 text-xs text-white/50">
-            {job.size_m2 ? `${job.size_m2} m² · ` : ""}
-            {job.rooms ? `${job.rooms}+1 · ` : ""}
-            {job.bathrooms ? `${job.bathrooms} ${lang === "tr" ? "banyo" : "Bad"}` : ""}
-          </p>
-
-          <div className="mt-4 flex items-center justify-between gap-3">
-            <p className="text-xs text-white/60">
-              {dict.jobs.reservationFee}:{" "}
-              <span className="font-bold text-white tabular-nums">
-                {Number(job.reservation_fee_amount).toFixed(2)} €
-              </span>
+            <p className="mt-3 flex items-center gap-1.5 text-sm text-ink/80">
+              <IconMapPin size={16} className="text-brand-dark" />
+              {job.postal_prefix} {job.city}
+              {job.district ? ` — ${job.district}` : ""}
+              {job.approx_distance_km != null && (
+                <span className="text-ink/45">· ~{job.approx_distance_km} km</span>
+              )}
             </p>
-            <button
-              type="button"
-              onClick={() => claim(job)}
-              disabled={claiming !== null}
-              className="min-h-11 cursor-pointer rounded-xl bg-brand px-5 text-sm font-extrabold text-ink transition-all duration-150 hover:bg-brand-dark active:scale-[0.98] disabled:opacity-40"
-            >
-              {claiming === job.id ? "…" : dict.jobs.takeJob}
-            </button>
-          </div>
-        </article>
-      ))}
+            <p className="mt-1 text-xs text-ink/50">
+              {job.size_m2 ? `${job.size_m2} m² · ` : ""}
+              {job.rooms ? `${job.rooms}+1 · ` : ""}
+              {job.bathrooms ? `${job.bathrooms} ${lang === "tr" ? "banyo" : "Bad"}` : ""}
+            </p>
+
+            <div className="mt-4 flex items-center justify-between gap-3 border-t border-ink/10 pt-3">
+              <p className="text-xs text-ink/55">
+                {dict.jobs.reservationFee}:{" "}
+                <span className="font-bold text-ink tabular-nums">
+                  {Number(job.reservation_fee_amount).toFixed(2)} €
+                </span>
+              </p>
+              <button
+                type="button"
+                onClick={() => claim(job)}
+                disabled={claiming !== null}
+                className="min-h-11 cursor-pointer rounded-xl bg-brand px-5 text-sm font-extrabold text-ink transition-all duration-150 hover:bg-brand-dark active:scale-[0.98] disabled:opacity-40"
+              >
+                {claiming === job.id ? "…" : dict.jobs.takeJob}
+              </button>
+            </div>
+          </article>
+        ))}
+      </div>
     </div>
   );
 }

@@ -26,6 +26,8 @@ import {
   IconStar,
   IconMapPin,
 } from "@/components/icons";
+import { HeroIllustration } from "@/components/hero-illustration";
+import { SupportWidget } from "@/components/support-widget";
 
 const NAV = [
   { href: "#so-funktionierts", label: "So funktioniert's" },
@@ -191,12 +193,10 @@ export default function Home() {
             <p className="mt-3 text-xs text-ink/50">Bereits über 1000+ zufriedene Kunden in Köln</p>
           </div>
 
-          {/* Görsel alanı — gerçek fotoğraf ile değiştirilebilir */}
+          {/* Görsel alanı — özgün flat illüstrasyon (gerçek fotoğrafla değiştirilebilir) */}
           <div className="relative">
-            <div className="relative aspect-4/3 overflow-hidden rounded-3xl bg-linear-to-br from-brand to-brand-dark">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <IconSparkle size={120} className="text-ink/15" />
-              </div>
+            <div className="relative aspect-4/3 overflow-hidden rounded-3xl bg-linear-to-br from-brand-soft to-brand/40">
+              <HeroIllustration className="absolute inset-0 size-full" />
               {/* Floating rating badge */}
               <div className="absolute left-4 top-4 flex items-center gap-2 rounded-xl bg-white/95 px-3 py-2 shadow-sm">
                 <IconStar size={18} className="text-brand-dark" />
@@ -365,6 +365,8 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      <SupportWidget />
     </div>
   );
 }

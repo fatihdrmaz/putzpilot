@@ -17,6 +17,7 @@ import {
   IconStar,
   IconUser,
 } from "@/components/icons";
+import { SupportWidget } from "@/components/support-widget";
 
 interface Booking {
   id: string;
@@ -197,6 +198,7 @@ export default function CustomerBookingsPage() {
           const st = STATUS_DE[b.status] ?? { label: b.status, tone: "bg-ink/5 text-ink" };
           const card = cards[b.id];
           const cancellable = ["pending_payment", "open", "assigned"].includes(b.status);
+          const trackable = ["assigned", "in_progress"].includes(b.status);
           const canReview = b.status === "completed" && !reviewed.has(b.id);
           return (
             <Card key={b.id} className="flex flex-col gap-3 p-5">
@@ -266,6 +268,15 @@ export default function CustomerBookingsPage() {
                 </div>
               )}
 
+              {trackable && (
+                <Link
+                  href={`/buchungen/${b.id}`}
+                  className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-ink px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-ink-soft"
+                >
+                  Live verfolgen
+                </Link>
+              )}
+
               {cancellable && (
                 <Button variant="danger" loading={busy === b.id} onClick={() => cancelBooking(b.id)}>
                   Stornieren
@@ -275,6 +286,8 @@ export default function CustomerBookingsPage() {
           );
         })}
       </div>
+
+      <SupportWidget />
     </main>
   );
 }

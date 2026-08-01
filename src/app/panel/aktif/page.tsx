@@ -1,7 +1,7 @@
 "use client";
 
 // Aktif işler (mockup adım 7-10): atanan işin tam adresi, GPS'li
-// 'Temizliğe Başla' ve 'Temizliği Tamamladım' butonları.
+// 'Temizliğe Başla' ve 'Temizliği Tamamladım' butonları. Açık tema, masaüstü grid.
 import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useLang } from "../lang-context";
@@ -103,80 +103,82 @@ export default function ActiveJobsPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-xl font-extrabold">{dict.dashboard.activeJobs}</h1>
+      <h1 className="text-2xl font-extrabold text-ink">{dict.dashboard.activeJobs}</h1>
       {error && <Banner tone="error">{error}</Banner>}
 
-      {jobs === null && !error && <div className="h-40 animate-pulse rounded-2xl bg-white/5" />}
+      {jobs === null && !error && <div className="h-48 animate-pulse rounded-2xl bg-ink/5" />}
 
       {jobs?.length === 0 && (
-        <p className="rounded-2xl bg-white/5 p-6 text-center text-sm text-white/60">
+        <p className="rounded-2xl border border-ink/10 bg-white p-8 text-center text-sm text-ink/55">
           {lang === "tr" ? "Aktif işiniz yok. Açık işlere göz atın." : "Keine aktiven Aufträge. Sehen Sie sich die offenen Aufträge an."}
         </p>
       )}
 
-      {jobs?.map((job) => (
-        <article key={job.id} className="rounded-2xl bg-white/5 p-5">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-bold">
-              {new Date(job.scheduled_date).toLocaleDateString(lang === "tr" ? "tr-TR" : "de-DE", { day: "numeric", month: "long" })}
-              , {job.start_time.slice(0, 5)}
-            </p>
-            <span
-              className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
-                job.status === "in_progress" ? "bg-success/20 text-success" : "bg-brand/20 text-brand"
-              }`}
-            >
-              {job.status === "in_progress"
-                ? lang === "tr" ? "Devam Ediyor" : "Läuft"
-                : lang === "tr" ? "Atandı" : "Zugewiesen"}
-            </span>
-          </div>
-
-          {job.address && (
-            <p className="mt-3 flex items-start gap-2 text-sm text-white/85">
-              <IconMapPin size={18} className="mt-0.5 shrink-0 text-brand" />
-              <span>
-                {job.address.street} {job.address.house_number}
-                {job.address.apartment ? `, ${job.address.apartment}` : ""}
-                {job.address.floor ? ` (${job.address.floor})` : ""}
-                <br />
-                {job.address.postal_code} {job.address.city}
+      <div className="grid gap-3 md:grid-cols-2">
+        {jobs?.map((job) => (
+          <article key={job.id} className="rounded-2xl border border-ink/10 bg-white p-5">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-bold text-ink">
+                {new Date(job.scheduled_date).toLocaleDateString(lang === "tr" ? "tr-TR" : "de-DE", { day: "numeric", month: "long" })}
+                , {job.start_time.slice(0, 5)}
+              </p>
+              <span
+                className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
+                  job.status === "in_progress" ? "bg-success/15 text-success" : "bg-brand-soft text-brand-dark"
+                }`}
+              >
+                {job.status === "in_progress"
+                  ? lang === "tr" ? "Devam Ediyor" : "Läuft"
+                  : lang === "tr" ? "Atandı" : "Zugewiesen"}
               </span>
-            </p>
-          )}
+            </div>
 
-          <p className="mt-2 flex items-center gap-2 text-xs text-white/60">
-            <IconClock size={14} />
-            {job.duration_hours} {dict.jobs.hours} ·{" "}
-            {lang === "tr" ? "Nakit tahsilat" : "Barzahlung"}:{" "}
-            <span className="font-bold text-white tabular-nums">{cashAmount(job)} €</span>
-          </p>
-
-          <div className="mt-4">
-            {job.status === "assigned" ? (
-              <button
-                type="button"
-                onClick={() => transition(job, "start")}
-                disabled={working !== null}
-                className="flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-brand text-sm font-extrabold text-ink transition-all duration-150 hover:bg-brand-dark active:scale-[0.98] disabled:opacity-40"
-              >
-                <IconLocate size={18} />
-                {working === job.id ? dict.jobs.gpsVerifying : dict.jobs.startCleaning}
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => transition(job, "complete")}
-                disabled={working !== null}
-                className="flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-success text-sm font-extrabold text-white transition-all duration-150 hover:brightness-110 active:scale-[0.98] disabled:opacity-40"
-              >
-                <IconCheckCircle size={18} />
-                {working === job.id ? dict.jobs.gpsVerifying : dict.jobs.completeCleaning}
-              </button>
+            {job.address && (
+              <p className="mt-3 flex items-start gap-2 text-sm text-ink/85">
+                <IconMapPin size={18} className="mt-0.5 shrink-0 text-brand-dark" />
+                <span>
+                  {job.address.street} {job.address.house_number}
+                  {job.address.apartment ? `, ${job.address.apartment}` : ""}
+                  {job.address.floor ? ` (${job.address.floor})` : ""}
+                  <br />
+                  {job.address.postal_code} {job.address.city}
+                </span>
+              </p>
             )}
-          </div>
-        </article>
-      ))}
+
+            <p className="mt-2 flex items-center gap-2 text-xs text-ink/55">
+              <IconClock size={14} />
+              {job.duration_hours} {dict.jobs.hours} ·{" "}
+              {lang === "tr" ? "Nakit tahsilat" : "Barzahlung"}:{" "}
+              <span className="font-bold text-ink tabular-nums">{cashAmount(job)} €</span>
+            </p>
+
+            <div className="mt-4">
+              {job.status === "assigned" ? (
+                <button
+                  type="button"
+                  onClick={() => transition(job, "start")}
+                  disabled={working !== null}
+                  className="flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-brand text-sm font-extrabold text-ink transition-all duration-150 hover:bg-brand-dark active:scale-[0.98] disabled:opacity-40"
+                >
+                  <IconLocate size={18} />
+                  {working === job.id ? dict.jobs.gpsVerifying : dict.jobs.startCleaning}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => transition(job, "complete")}
+                  disabled={working !== null}
+                  className="flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-success text-sm font-extrabold text-white transition-all duration-150 hover:brightness-110 active:scale-[0.98] disabled:opacity-40"
+                >
+                  <IconCheckCircle size={18} />
+                  {working === job.id ? dict.jobs.gpsVerifying : dict.jobs.completeCleaning}
+                </button>
+              )}
+            </div>
+          </article>
+        ))}
+      </div>
     </div>
   );
 }

@@ -1,12 +1,19 @@
 "use client";
 
-// Temizlikçi dashboard (mockup adım 4) — koyu tema, kazanç kartı, hızlı menü.
+// Temizlikçi dashboard (mockup adım 8) — istatistik kartları + hızlı menü.
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useLang } from "./lang-context";
-import { IconBriefcase, IconChevronRight, IconStar, IconWallet, IconCheckCircle } from "@/components/icons";
+import {
+  IconBriefcase,
+  IconChevronRight,
+  IconStar,
+  IconWallet,
+  IconCheckCircle,
+  IconEuro,
+} from "@/components/icons";
 
 interface Earnings {
   monthly_earnings: number;
@@ -52,6 +59,29 @@ export default function PanelDashboard() {
     });
   }, [router]);
 
+  const stats = [
+    {
+      label: dict.earnings.thisMonth,
+      value: `${(earnings?.monthly_earnings ?? 0).toFixed(0)} €`,
+      icon: IconEuro,
+    },
+    {
+      label: dict.dashboard.completedJobs,
+      value: String(earnings?.jobs_completed ?? 0),
+      icon: IconCheckCircle,
+    },
+    {
+      label: dict.dashboard.avgRating,
+      value: earnings?.rating_avg?.toFixed(1) ?? "—",
+      icon: IconStar,
+    },
+    {
+      label: dict.earnings.total,
+      value: `${(earnings?.total_earnings ?? 0).toFixed(0)} €`,
+      icon: IconWallet,
+    },
+  ];
+
   const menu = [
     { href: "/panel/isler", label: dict.dashboard.openJobs, icon: IconBriefcase },
     { href: "/panel/aktif", label: dict.dashboard.activeJobs, icon: IconCheckCircle },
@@ -59,13 +89,13 @@ export default function PanelDashboard() {
   ];
 
   return (
-    <div className="flex flex-col gap-5">
-      <h1 className="text-2xl font-extrabold">
+    <div className="flex flex-col gap-6">
+      <h1 className="text-2xl font-extrabold text-ink">
         {dict.dashboard.greeting}, {name || "…"} 👋
       </h1>
 
       {status && status !== "approved" && (
-        <div className="rounded-xl border border-brand/40 bg-brand/10 px-4 py-3 text-sm text-brand">
+        <div className="rounded-xl border border-brand/40 bg-brand-soft px-4 py-3 text-sm text-ink">
           {dict.documents.pendingInfo}{" "}
           <Link href="/panel/profil" className="font-bold underline">
             {dict.documents.title}
@@ -73,26 +103,16 @@ export default function PanelDashboard() {
         </div>
       )}
 
-      <section className="rounded-2xl bg-white/5 p-5">
-        <p className="text-xs font-semibold uppercase tracking-wide text-white/50">
-          {dict.earnings.thisMonth}
-        </p>
-        <p className="mt-1 text-4xl font-extrabold tabular-nums">
-          {(earnings?.monthly_earnings ?? 0).toFixed(2)} €
-        </p>
-        <div className="mt-4 flex gap-6 text-sm">
-          <div>
-            <p className="text-white/50">{dict.dashboard.completedJobs}</p>
-            <p className="font-bold tabular-nums">{earnings?.jobs_completed ?? 0}</p>
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {stats.map(({ label, value, icon: Icon }) => (
+          <div key={label} className="rounded-2xl border border-ink/10 bg-white p-4">
+            <span className="flex size-9 items-center justify-center rounded-lg bg-brand-soft">
+              <Icon size={18} className="text-brand-dark" />
+            </span>
+            <p className="mt-3 text-2xl font-extrabold tabular-nums text-ink">{value}</p>
+            <p className="mt-0.5 text-xs font-semibold text-ink/55">{label}</p>
           </div>
-          <div>
-            <p className="text-white/50">{dict.dashboard.avgRating}</p>
-            <p className="flex items-center gap-1 font-bold tabular-nums">
-              {earnings?.rating_avg?.toFixed(1) ?? "—"}
-              <IconStar size={14} className="text-brand" />
-            </p>
-          </div>
-        </div>
+        ))}
       </section>
 
       <nav className="flex flex-col gap-2">
@@ -100,18 +120,18 @@ export default function PanelDashboard() {
           <Link
             key={href}
             href={href}
-            className="flex min-h-14 cursor-pointer items-center justify-between rounded-xl bg-white/5 px-4 transition-colors hover:bg-white/10"
+            className="flex min-h-14 cursor-pointer items-center justify-between rounded-xl border border-ink/10 bg-white px-4 transition-colors hover:border-brand"
           >
-            <span className="flex items-center gap-3 text-sm font-bold">
-              <Icon size={20} className="text-brand" />
+            <span className="flex items-center gap-3 text-sm font-bold text-ink">
+              <Icon size={20} className="text-brand-dark" />
               {label}
             </span>
-            <IconChevronRight size={18} className="text-white/40" />
+            <IconChevronRight size={18} className="text-ink/35" />
           </Link>
         ))}
       </nav>
 
-      <p className="text-center text-xs text-white/40">
+      <p className="text-center text-xs text-ink/45">
         {lang === "tr"
           ? "Kazançlar temizlik sonunda müşteriden nakit tahsil edilir."
           : "Einnahmen werden nach der Reinigung bar vom Kunden kassiert."}

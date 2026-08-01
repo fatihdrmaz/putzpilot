@@ -1,7 +1,7 @@
 "use client";
 
 // Profil + belge yükleme (mockup adım 2-3). Belgeler private 'documents'
-// bucket'ına documents/{userId}/... yoluyla gider; sadece sahibi ve admin okur.
+// bucket'ına documents/{userId}/... yoluyla gider. Açık tema, masaüstü grid.
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -83,73 +83,75 @@ export default function ProfilePage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="text-xl font-extrabold">{dict.dashboard.profile}</h1>
+      <h1 className="text-2xl font-extrabold text-ink">{dict.dashboard.profile}</h1>
       {error && <Banner tone="error">{error}</Banner>}
 
-      <section className="flex items-center gap-4 rounded-2xl bg-white/5 p-5">
-        <span className="flex size-14 items-center justify-center rounded-full bg-brand/20">
-          <IconUser size={26} className="text-brand" />
-        </span>
-        <div>
-          <p className="font-bold">{name || "…"}</p>
-          <p
-            className={`text-xs font-semibold ${
-              status === "approved" ? "text-success" : status === "rejected" ? "text-danger" : "text-brand"
-            }`}
-          >
-            {statusLabel}
-          </p>
-        </div>
-      </section>
+      <div className="grid gap-5 md:grid-cols-2">
+        <section className="flex items-center gap-4 rounded-2xl border border-ink/10 bg-white p-5">
+          <span className="flex size-14 items-center justify-center rounded-full bg-brand-soft">
+            <IconUser size={26} className="text-brand-dark" />
+          </span>
+          <div>
+            <p className="font-bold text-ink">{name || "…"}</p>
+            <p
+              className={`text-xs font-semibold ${
+                status === "approved" ? "text-success" : status === "rejected" ? "text-danger" : "text-brand-dark"
+              }`}
+            >
+              {statusLabel}
+            </p>
+          </div>
+        </section>
 
-      <section className="rounded-2xl bg-white/5 p-5">
-        <h2 className="text-sm font-bold">{dict.documents.title}</h2>
-        <p className="mt-1 text-xs text-white/50">{dict.documents.pendingInfo}</p>
+        <section className="rounded-2xl border border-ink/10 bg-white p-5">
+          <h2 className="text-sm font-bold text-ink">{dict.documents.title}</h2>
+          <p className="mt-1 text-xs text-ink/55">{dict.documents.pendingInfo}</p>
 
-        <div className="mt-4 flex flex-col gap-3">
-          {(
-            [
-              ["id", dict.documents.idPassport, idInput],
-              ["residence", dict.documents.residence, resInput],
-            ] as [DocKind, string, React.RefObject<HTMLInputElement | null>][]
-          ).map(([kind, label, ref]) => (
-            <div key={kind} className="flex items-center justify-between gap-3">
-              <span className="text-sm font-semibold">{label}</span>
-              {docs[kind] ? (
-                <span className="flex items-center gap-1.5 text-xs font-bold text-success">
-                  <IconCheckCircle size={16} /> {dict.documents.uploaded}
-                </span>
-              ) : (
-                <>
-                  <input
-                    ref={ref}
-                    type="file"
-                    accept="image/*,.pdf"
-                    className="hidden"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      if (f) upload(kind, f);
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => ref.current?.click()}
-                    disabled={uploading !== null}
-                    className="min-h-10 cursor-pointer rounded-xl bg-brand px-4 text-xs font-extrabold text-ink hover:bg-brand-dark disabled:opacity-40"
-                  >
-                    {uploading === kind ? "…" : lang === "tr" ? "Yükle" : "Hochladen"}
-                  </button>
-                </>
-              )}
-            </div>
-          ))}
-        </div>
-      </section>
+          <div className="mt-4 flex flex-col gap-3">
+            {(
+              [
+                ["id", dict.documents.idPassport, idInput],
+                ["residence", dict.documents.residence, resInput],
+              ] as [DocKind, string, React.RefObject<HTMLInputElement | null>][]
+            ).map(([kind, label, ref]) => (
+              <div key={kind} className="flex items-center justify-between gap-3">
+                <span className="text-sm font-semibold text-ink">{label}</span>
+                {docs[kind] ? (
+                  <span className="flex items-center gap-1.5 text-xs font-bold text-success">
+                    <IconCheckCircle size={16} /> {dict.documents.uploaded}
+                  </span>
+                ) : (
+                  <>
+                    <input
+                      ref={ref}
+                      type="file"
+                      accept="image/*,.pdf"
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) upload(kind, f);
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => ref.current?.click()}
+                      disabled={uploading !== null}
+                      className="min-h-10 cursor-pointer rounded-xl bg-brand px-4 text-xs font-extrabold text-ink hover:bg-brand-dark disabled:opacity-40"
+                    >
+                      {uploading === kind ? "…" : lang === "tr" ? "Yükle" : "Hochladen"}
+                    </button>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
 
       <button
         type="button"
         onClick={logout}
-        className="flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl border border-danger/40 text-sm font-bold text-danger transition-colors hover:bg-danger/10"
+        className="flex min-h-12 max-w-xs cursor-pointer items-center justify-center gap-2 rounded-xl border border-danger/40 text-sm font-bold text-danger transition-colors hover:bg-danger/10"
       >
         <IconLogout size={18} />
         {lang === "tr" ? "Çıkış Yap" : "Abmelden"}
