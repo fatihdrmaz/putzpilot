@@ -13,6 +13,8 @@ import {
   IconWhatsApp,
   IconEuro,
   IconStar,
+  IconChart,
+  IconSettings,
   IconLogout,
 } from "@/components/icons";
 
@@ -22,7 +24,9 @@ const NAV = [
   { href: "/admin/rezervasyonlar", label: "Rezervasyonlar", icon: IconBriefcase },
   { href: "/admin/yorumlar", label: "Yorumlar", icon: IconStar },
   { href: "/admin/destek", label: "Destek", icon: IconWhatsApp },
+  { href: "/admin/raporlar", label: "Raporlar", icon: IconChart },
   { href: "/admin/fiyatlar", label: "Fiyatlar", icon: IconEuro },
+  { href: "/admin/ayarlar", label: "Ayarlar", icon: IconSettings },
 ];
 
 export default function AdminLayout({ children }: { children: ReactNode }) {

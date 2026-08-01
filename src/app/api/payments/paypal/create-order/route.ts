@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createOrder, isPayPalConfigured } from "@/lib/paypal";
+import { loadNumericSetting } from "@/lib/bookings";
 
 // Ön ödeme (%20, müşteri) veya rezervasyon ücreti (%10, temizlikçi) için
 // PayPal order oluşturur. Tutar DB'deki booking'den okunur.
@@ -55,9 +56,10 @@ export async function POST(request: NextRequest) {
     if (booking.status !== "open") {
       return NextResponse.json({ error: "İş artık açık değil" }, { status: 409 });
     }
+    const lockMinutes = await loadNumericSetting(admin, "claim_lock_minutes", 10);
     const lockFresh =
       booking.claim_locked_at &&
-      Date.now() - new Date(booking.claim_locked_at).getTime() < 10 * 60 * 1000;
+      Date.now() - new Date(booking.claim_locked_at).getTime() < lockMinutes * 60 * 1000;
     if (booking.claim_locked_by !== user.id || !lockFresh) {
       return NextResponse.json(
         { error: "Önce 'İşi Al' ile işi kilitleyin" },

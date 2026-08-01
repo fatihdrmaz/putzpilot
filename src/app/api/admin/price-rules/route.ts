@@ -8,6 +8,9 @@ const ALLOWED_KEYS = [
   "moving_pct",
   "construction_pct",
   "base_hour_price",
+  // Platform ayarları (admin Ayarlar sayfası)
+  "gps_max_distance_m",
+  "claim_lock_minutes",
 ];
 
 export async function GET() {

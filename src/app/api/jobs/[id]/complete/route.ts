@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { GPS_MAX_DISTANCE_M, haversineMeters } from "@/lib/pricing";
+import { loadNumericSetting } from "@/lib/bookings";
 import { sendWhatsAppTemplate } from "@/lib/notifications";
 
 // 'Temizliği Tamamladım' — GPS tekrar doğrulanır; müşteriye tamamlama +
@@ -42,10 +43,11 @@ export async function POST(
     .eq("id", booking.address_id)
     .single();
 
+  const gpsMax = await loadNumericSetting(admin, "gps_max_distance_m", GPS_MAX_DISTANCE_M);
   let distance: number | null = null;
   if (address?.lat != null && address?.lng != null) {
     distance = haversineMeters(lat, lng, address.lat, address.lng);
-    if (distance > GPS_MAX_DISTANCE_M) {
+    if (distance > gpsMax) {
       await admin.from("job_events").insert({
         booking_id: booking.id,
         type: "gps_fail",

@@ -18,9 +18,9 @@ import {
   Toggle,
   Banner,
 } from "@/components/ui";
-import { IconChevronLeft, IconSparkle } from "@/components/icons";
+import { IconCamera, IconChevronLeft, IconSparkle, IconX } from "@/components/icons";
 
-const PRIORITIES = ["Küche", "Bad", "Fenster", "Bügeln", "Balkon / Terrasse"] as const;
+const PRIORITIES = ["Küche", "Bad", "Fenster", "Bügeln", "Balkon / Terrasse", "Sonstiges"] as const;
 
 const CLEANING_TYPES = [
   { key: "normal", label: "Normale Reinigung", sub: "Standard-Reinigung", extra: "" },
@@ -55,6 +55,8 @@ export default function BookingWizard() {
   const [date, setDate] = useState("");
   const [startTime, setStartTime] = useState("10:00");
   const [hours, setHours] = useState(4);
+  const [notes, setNotes] = useState("");
+  const [photos, setPhotos] = useState<File[]>([]);
 
   useEffect(() => {
     createClient()
@@ -109,6 +111,19 @@ export default function BookingWizard() {
     setLoading(true);
     setError(null);
     try {
+      // Opsiyonel ev fotoğrafları — private 'documents' bucket'ına (sahibi + admin
+      // + atanmış temizlikçi signed URL ile görür)
+      const supabase = createClient();
+      const { data: userData } = await supabase.auth.getUser();
+      const photoPaths: string[] = [];
+      for (const [i, file] of photos.entries()) {
+        const ext = file.name.split(".").pop() ?? "jpg";
+        const path = `${userData.user!.id}/booking-${Date.now()}-${i}.${ext}`;
+        const { error: upErr } = await supabase.storage.from("documents").upload(path, file);
+        if (upErr) throw new Error(`Foto-Upload fehlgeschlagen: ${upErr.message}`);
+        photoPaths.push(path);
+      }
+
       const res = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -130,6 +145,8 @@ export default function BookingWizard() {
           smoking,
           has_elevator: hasElevator,
           someone_home: someoneHome,
+          photo_urls: photoPaths,
+          notes,
           scheduled_date: date,
           start_time: startTime,
         }),
@@ -287,6 +304,16 @@ export default function BookingWizard() {
                 </ChoiceChip>
               ))}
             </div>
+            <Field label="Anmerkungen (optional)" htmlFor="notes" helper="Gibt es etwas Besonderes, das wir beachten sollen?">
+              <textarea
+                id="notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                maxLength={1000}
+                className="min-h-20 w-full rounded-xl border-2 border-ink/10 px-4 py-2.5 text-base text-ink placeholder:text-ink/35 focus:border-brand focus:outline-none"
+                placeholder="z. B. Haustür-Code, empfindliche Oberflächen…"
+              />
+            </Field>
           </>
         )}
 
@@ -305,6 +332,49 @@ export default function BookingWizard() {
                 <Toggle checked={value} onChange={setter} label={label} />
               </div>
             ))}
+
+            {/* Ev fotoğrafları (opsiyonel, mockup adım 6) */}
+            <div className="border-t border-ink/10 pt-4">
+              <p className="text-sm font-semibold text-ink">Fotos der Wohnung (optional)</p>
+              <p className="mt-0.5 text-xs text-ink/50">
+                Hilft der Reinigungskraft, den Aufwand besser einzuschätzen. Max. 5 Fotos.
+              </p>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                {photos.map((f, i) => (
+                  <span
+                    key={i}
+                    className="flex items-center gap-1.5 rounded-xl bg-brand-soft px-3 py-2 text-xs font-semibold text-ink"
+                  >
+                    {f.name.length > 18 ? `${f.name.slice(0, 15)}…` : f.name}
+                    <button
+                      type="button"
+                      aria-label="Foto entfernen"
+                      onClick={() => setPhotos((p) => p.filter((_, x) => x !== i))}
+                      className="cursor-pointer text-ink/50 hover:text-danger"
+                    >
+                      <IconX size={14} />
+                    </button>
+                  </span>
+                ))}
+                {photos.length < 5 && (
+                  <label className="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border-2 border-dashed border-ink/20 px-4 py-2.5 text-sm font-semibold text-ink/60 transition-colors hover:border-brand hover:text-ink">
+                    <IconCamera size={18} />
+                    Foto hinzufügen
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                      onChange={(e) => {
+                        const files = Array.from(e.target.files ?? []);
+                        setPhotos((p) => [...p, ...files].slice(0, 5));
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                )}
+              </div>
+            </div>
           </div>
         )}
 

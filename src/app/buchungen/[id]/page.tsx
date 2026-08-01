@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Banner, Card } from "@/components/ui";
+import { ChatBox } from "@/components/chat-box";
 import {
   IconCheckCircle,
   IconChevronLeft,
@@ -177,6 +178,20 @@ export default function TrackingPage() {
               })}
             </ol>
           </Card>
+
+          {/* Uygulama içi mesajlaşma — atama sonrası (mockup: "Mesaj Gönder") */}
+          {data.cleaner && data.status !== "cancelled" && (
+            <div>
+              <p className="mb-2 text-sm font-bold text-ink">
+                Nachricht an {data.cleaner.name}
+              </p>
+              <ChatBox
+                bookingId={params.id}
+                placeholder="Ihre Nachricht…"
+                emptyText="Schreiben Sie Ihrer Reinigungskraft zu diesem Auftrag."
+              />
+            </div>
+          )}
 
           {data.status === "completed" && (
             <Link

@@ -145,6 +145,18 @@ export const IconLocate = (p: P) => (
     <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
   </svg>
 );
+export const IconChart = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M3 3v18h18" />
+    <path d="M7 15v-4M12 17V7M17 17v-7" />
+  </svg>
+);
+export const IconSettings = (p: P) => (
+  <svg {...base(p)}>
+    <circle cx="12" cy="12" r="3" />
+    <path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1L7 17M17 7l2.1-2.1" />
+  </svg>
+);
 export const IconMenu = (p: P) => (
   <svg {...base(p)}>
     <path d="M4 7h16M4 12h16M4 17h16" />

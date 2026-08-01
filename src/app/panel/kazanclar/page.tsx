@@ -1,29 +1,67 @@
 "use client";
 
 // Kazançlarım (PRD Bölüm 8) — bilgilendirme ekranı: cüzdan/bakiye/Para Çek YOK.
-// Açık tema, masaüstünde iki sütun (özet + geçmiş).
-import { useEffect, useState } from "react";
+// + Tamamlanan işlerde müşteriyi değerlendirme (mockup temizlikçi adım 11).
+import { useCallback, useEffect, useState } from "react";
 import { useLang } from "../lang-context";
-import { IconStar } from "@/components/icons";
+import { Banner, Button } from "@/components/ui";
+import { IconCheckCircle, IconStar } from "@/components/icons";
 
 interface Earnings {
   monthly_earnings: number;
   total_earnings: number;
   jobs_completed: number;
   rating_avg: number | null;
-  history: { booking_id: string; date: string; earned_cash: number; reservation_fee_paid: number }[];
+  history: {
+    booking_id: string;
+    date: string;
+    earned_cash: number;
+    reservation_fee_paid: number;
+    reviewed: boolean;
+  }[];
 }
 
 export default function EarningsPage() {
   const { dict, lang } = useLang();
   const [data, setData] = useState<Earnings | null>(null);
+  const [rateOpen, setRateOpen] = useState<string | null>(null);
+  const [stars, setStars] = useState(0);
+  const [comment, setComment] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     fetch("/api/cleaner/earnings")
       .then((r) => (r.ok ? r.json() : null))
       .then(setData)
       .catch(() => null);
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  async function submitRating(bookingId: string) {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ booking_id: bookingId, rating: stars, comment }),
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error);
+      setRateOpen(null);
+      setStars(0);
+      setComment("");
+      load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : dict.common.error);
+    } finally {
+      setBusy(false);
+    }
+  }
 
   return (
     <div className="flex flex-col gap-5">
@@ -66,20 +104,87 @@ export default function EarningsPage() {
               {lang === "tr" ? "Henüz tamamlanan iş yok." : "Noch keine abgeschlossenen Aufträge."}
             </p>
           )}
+          {error && <Banner tone="error">{error}</Banner>}
           <div className="flex flex-col gap-2">
             {data?.history?.map((h) => (
-              <div key={h.booking_id} className="flex items-center justify-between rounded-xl border border-ink/10 bg-white px-4 py-3">
-                <div>
-                  <p className="text-sm font-semibold text-ink">
-                    {new Date(h.date).toLocaleDateString(lang === "tr" ? "tr-TR" : "de-DE")}
-                  </p>
-                  <p className="text-xs text-ink/50">
-                    {dict.earnings.feePaid}: {h.reservation_fee_paid.toFixed(2)} €
+              <div key={h.booking_id} className="rounded-xl border border-ink/10 bg-white px-4 py-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-ink">
+                      {new Date(h.date).toLocaleDateString(lang === "tr" ? "tr-TR" : "de-DE")}
+                    </p>
+                    <p className="text-xs text-ink/50">
+                      {dict.earnings.feePaid}: {h.reservation_fee_paid.toFixed(2)} €
+                    </p>
+                  </div>
+                  <p className="font-extrabold tabular-nums text-success">
+                    +{h.earned_cash.toFixed(2)} €
                   </p>
                 </div>
-                <p className="font-extrabold tabular-nums text-success">
-                  +{h.earned_cash.toFixed(2)} €
-                </p>
+
+                {/* Müşteri değerlendirmesi (mockup adım 11) */}
+                {h.reviewed ? (
+                  <p className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-success">
+                    <IconCheckCircle size={14} />
+                    {lang === "tr" ? "Müşteri değerlendirildi" : "Kunde bewertet"}
+                  </p>
+                ) : rateOpen === h.booking_id ? (
+                  <div className="mt-3 flex flex-col gap-2 border-t border-ink/10 pt-3">
+                    <p className="text-xs font-bold text-ink">{dict.review.title}</p>
+                    <div className="flex gap-1" role="radiogroup">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          role="radio"
+                          aria-checked={stars === s}
+                          aria-label={`${s}`}
+                          onClick={() => setStars(s)}
+                          className="cursor-pointer p-0.5"
+                        >
+                          <IconStar size={22} className={s <= stars ? "text-brand" : "text-ink/15"} />
+                        </button>
+                      ))}
+                    </div>
+                    <textarea
+                      value={comment}
+                      onChange={(e) => setComment(e.target.value)}
+                      placeholder={dict.review.commentOptional}
+                      className="min-h-14 w-full rounded-xl border-2 border-ink/10 px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none"
+                    />
+                    <p className="text-[11px] text-ink/45">{dict.review.goodReviews}</p>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => submitRating(h.booking_id)}
+                        loading={busy}
+                        disabled={!stars}
+                        className="!min-h-10 flex-1 !text-xs"
+                      >
+                        {lang === "tr" ? "Gönder" : "Senden"}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setRateOpen(null)}
+                        className="!min-h-10 flex-1 !text-xs"
+                      >
+                        {dict.common.cancel}
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRateOpen(h.booking_id);
+                      setStars(0);
+                      setComment("");
+                    }}
+                    className="mt-2 flex cursor-pointer items-center gap-1.5 text-xs font-bold text-brand-dark hover:underline"
+                  >
+                    <IconStar size={14} />
+                    {lang === "tr" ? "Müşteriyi değerlendir" : "Kunden bewerten"}
+                  </button>
+                )}
               </div>
             ))}
           </div>

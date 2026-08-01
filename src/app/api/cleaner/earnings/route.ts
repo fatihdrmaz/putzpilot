@@ -39,6 +39,14 @@ export async function GET() {
     .eq("user_id", user.id)
     .single();
 
+  // Temizlikçinin müşteriyi değerlendirdiği işler (mockup adım 11 için)
+  const { data: myReviews } = await admin
+    .from("reviews")
+    .select("booking_id")
+    .eq("reviewer", "cleaner")
+    .in("booking_id", completed.map((j) => j.id));
+  const reviewedSet = new Set((myReviews ?? []).map((r) => r.booking_id));
+
   return NextResponse.json({
     monthly_earnings: completed.filter((j) => isThisMonth(j.scheduled_date)).reduce((s, j) => s + cashOf(j), 0),
     total_earnings: completed.reduce((s, j) => s + cashOf(j), 0),
@@ -49,6 +57,7 @@ export async function GET() {
       date: j.scheduled_date,
       earned_cash: cashOf(j),
       reservation_fee_paid: Number(j.reservation_fee_amount),
+      reviewed: reviewedSet.has(j.id),
     })),
   });
 }

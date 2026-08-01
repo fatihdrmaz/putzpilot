@@ -9,6 +9,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { LangProvider, useLang } from "./lang-context";
+import { SupportWidget } from "@/components/support-widget";
 import {
   IconHome,
   IconBriefcase,
@@ -148,6 +149,9 @@ function PanelShell({ children }: { children: ReactNode }) {
           })}
         </div>
       </nav>
+
+      {/* Acil destek / Sorun Bildir (PRD Bölüm 7 — her iki taraf için) */}
+      <SupportWidget locale={lang} aboveNav />
     </div>
   );
 }

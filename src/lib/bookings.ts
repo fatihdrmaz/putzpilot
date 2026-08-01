@@ -6,6 +6,17 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { PriceRules } from "@/lib/pricing";
 import { sendWhatsAppTemplate } from "@/lib/notifications";
 
+// Tekil sayısal platform ayarı (price_rules key-value deposundan)
+export async function loadNumericSetting(
+  db: SupabaseClient,
+  key: string,
+  fallback: number
+): Promise<number> {
+  const { data } = await db.from("price_rules").select("value").eq("key", key).maybeSingle();
+  const n = data ? Number(data.value) : NaN;
+  return Number.isFinite(n) ? n : fallback;
+}
+
 export async function loadPriceRules(db: SupabaseClient): Promise<PriceRules> {
   const { data, error } = await db.from("price_rules").select("key, value");
   if (error) throw new Error(`price_rules okunamadı: ${error.message}`);

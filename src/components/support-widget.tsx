@@ -13,7 +13,33 @@ interface Msg {
   created_at: string;
 }
 
-export function SupportWidget() {
+const TEXTS = {
+  de: {
+    title: "PutzPilot Support",
+    subtitle: "Antwort meist in wenigen Minuten",
+    loginPrompt: "Bitte melden Sie sich an, um den Support zu nutzen.",
+    login: "Anmelden",
+    empty: "Stellen Sie Ihre Frage auf Deutsch — unser Team antwortet Ihnen hier.",
+    placeholder: "Ihre Nachricht…",
+  },
+  tr: {
+    title: "PutzPilot Destek",
+    subtitle: "Genellikle birkaç dakikada yanıt",
+    loginPrompt: "Desteği kullanmak için giriş yapın.",
+    login: "Giriş Yap",
+    empty: "Sorununuzu yazın — ekibimiz buradan yanıtlayacak.",
+    placeholder: "Mesajınız…",
+  },
+};
+
+export function SupportWidget({
+  locale = "de",
+  aboveNav = false,
+}: {
+  locale?: "de" | "tr";
+  aboveNav?: boolean; // mobil alt navigasyonun üstünde konumlan (temizlikçi paneli)
+}) {
+  const t = TEXTS[locale];
   const [open, setOpen] = useState(false);
   const [loggedIn, setLoggedIn] = useState<boolean | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -61,39 +87,43 @@ export function SupportWidget() {
       {/* Yüzen buton */}
       <button
         type="button"
-        aria-label="WhatsApp Support"
+        aria-label={t.title}
         onClick={() => setOpen((o) => !o)}
-        className="fixed bottom-5 right-5 z-50 flex size-14 cursor-pointer items-center justify-center rounded-full bg-success text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
+        className={`fixed right-5 z-50 flex size-14 cursor-pointer items-center justify-center rounded-full bg-success text-white shadow-lg transition-transform hover:scale-105 active:scale-95 ${
+          aboveNav ? "bottom-20 md:bottom-5" : "bottom-5"
+        }`}
       >
         {open ? <IconX size={24} /> : <IconWhatsApp size={26} />}
       </button>
 
       {open && (
-        <div className="fixed bottom-24 right-5 z-50 flex h-[28rem] w-[min(22rem,calc(100vw-2.5rem))] flex-col overflow-hidden rounded-2xl border border-ink/10 bg-white shadow-xl">
+        <div
+          className={`fixed right-5 z-50 flex h-[28rem] w-[min(22rem,calc(100vw-2.5rem))] flex-col overflow-hidden rounded-2xl border border-ink/10 bg-white shadow-xl ${
+            aboveNav ? "bottom-[9.5rem] md:bottom-24" : "bottom-24"
+          }`}
+        >
           <div className="flex items-center gap-2 bg-ink px-4 py-3 text-white">
             <span className="flex size-8 items-center justify-center rounded-full bg-success">
               <IconWhatsApp size={18} />
             </span>
             <div>
-              <p className="text-sm font-bold">PutzPilot Support</p>
-              <p className="text-[11px] text-white/60">Antwort meist in wenigen Minuten</p>
+              <p className="text-sm font-bold">{t.title}</p>
+              <p className="text-[11px] text-white/60">{t.subtitle}</p>
             </div>
           </div>
 
           {loggedIn === false ? (
             <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
-              <p className="text-sm text-ink/60">Bitte melden Sie sich an, um den Support zu nutzen.</p>
+              <p className="text-sm text-ink/60">{t.loginPrompt}</p>
               <Link href="/login" className="rounded-xl bg-brand px-4 py-2 text-sm font-bold text-ink hover:bg-brand-dark">
-                Anmelden
+                {t.login}
               </Link>
             </div>
           ) : (
             <>
               <div ref={scrollRef} className="flex flex-1 flex-col gap-2 overflow-y-auto p-3">
                 {messages.length === 0 && (
-                  <p className="m-auto max-w-56 text-center text-xs text-ink/50">
-                    Stellen Sie Ihre Frage auf Deutsch — unser Team antwortet Ihnen hier.
-                  </p>
+                  <p className="m-auto max-w-56 text-center text-xs text-ink/50">{t.empty}</p>
                 )}
                 {messages.map((m, i) => (
                   <div
@@ -113,7 +143,7 @@ export function SupportWidget() {
                   value={text}
                   onChange={(e) => setText(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), send())}
-                  placeholder="Ihre Nachricht…"
+                  placeholder={t.placeholder}
                   className="min-h-10 flex-1 rounded-xl border border-ink/10 px-3 text-sm focus:border-brand focus:outline-none"
                 />
                 <button

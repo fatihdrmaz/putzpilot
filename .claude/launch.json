@@ -7,6 +7,12 @@
       "runtimeArgs": ["run", "dev"],
       "port": 3000,
       "autoPort": true
+    },
+    {
+      "name": "gatejam-proto",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8777", "--directory", "/private/tmp/claude-501/-Users-fatihdurmaz-expo-projects-putz/ed3b12f6-e29f-489e-8455-ec9ee8248985/scratchpad"],
+      "port": 8777
     }
   ]
 }

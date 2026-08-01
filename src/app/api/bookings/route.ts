@@ -27,6 +27,7 @@ export async function POST(request: NextRequest) {
     has_elevator,
     someone_home,
     photo_urls,
+    notes,
     scheduled_date,
     start_time,
   } = body;
@@ -82,6 +83,7 @@ export async function POST(request: NextRequest) {
       has_elevator: Boolean(has_elevator),
       someone_home: Boolean(someone_home),
       photo_urls: photo_urls ?? [],
+      notes: typeof notes === "string" && notes.trim() ? notes.trim().slice(0, 1000) : null,
       scheduled_date,
       start_time,
       base_price: quote.basePrice,
