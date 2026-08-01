@@ -12,6 +12,7 @@ import {
   IconBriefcase,
   IconWhatsApp,
   IconEuro,
+  IconStar,
   IconLogout,
 } from "@/components/icons";
 
@@ -19,6 +20,7 @@ const NAV = [
   { href: "/admin", label: "Panel", icon: IconHome },
   { href: "/admin/temizlikciler", label: "Temizlikçiler", icon: IconUser },
   { href: "/admin/rezervasyonlar", label: "Rezervasyonlar", icon: IconBriefcase },
+  { href: "/admin/yorumlar", label: "Yorumlar", icon: IconStar },
   { href: "/admin/destek", label: "Destek", icon: IconWhatsApp },
   { href: "/admin/fiyatlar", label: "Fiyatlar", icon: IconEuro },
 ];

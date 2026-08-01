@@ -200,7 +200,9 @@ export default function CustomerBookingsPage() {
           </span>
           <span className="font-extrabold text-ink">Meine Buchungen</span>
         </div>
-        <span className="w-11" />
+        <Link href="/konto" aria-label="Mein Konto" className="flex size-11 items-center justify-center rounded-xl hover:bg-ink/5">
+          <IconUser size={22} className="text-ink" />
+        </Link>
       </header>
 
       {error && <div className="mb-3"><Banner tone="error">{error}</Banner></div>}
