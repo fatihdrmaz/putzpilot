@@ -29,6 +29,7 @@ interface Booking {
   total_price: string;
   prepayment_amount: string;
   cleaner_id: string | null;
+  reschedule_count: number;
   addresses: { street: string; house_number: string; postal_code: string; city: string } | null;
 }
 
@@ -78,6 +79,7 @@ export default function CustomerBookingsPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [reschedule, setReschedule] = useState<{ id: string; date: string; time: string } | null>(null);
 
   const load = useCallback(async () => {
     const supabase = createClient();
@@ -89,7 +91,7 @@ export default function CustomerBookingsPage() {
     const { data, error } = await supabase
       .from("bookings")
       .select(
-        "id, status, cleaning_type, duration_hours, scheduled_date, start_time, total_price, prepayment_amount, cleaner_id, addresses (street, house_number, postal_code, city)"
+        "id, status, cleaning_type, duration_hours, scheduled_date, start_time, total_price, prepayment_amount, cleaner_id, reschedule_count, addresses (street, house_number, postal_code, city)"
       )
       .eq("customer_id", userData.user.id)
       .neq("status", "draft")
@@ -134,6 +136,28 @@ export default function CustomerBookingsPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setNotice("Ihre Buchung wurde storniert. Etwaige Erstattungen erfolgen über PayPal.");
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Fehler");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function submitReschedule() {
+    if (!reschedule) return;
+    setBusy(reschedule.id);
+    setError(null);
+    try {
+      const res = await fetch(`/api/bookings/${reschedule.id}/reschedule`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scheduled_date: reschedule.date, start_time: reschedule.time }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setNotice("Ihr Termin wurde verschoben.");
+      setReschedule(null);
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Fehler");
@@ -200,6 +224,10 @@ export default function CustomerBookingsPage() {
           const cancellable = ["pending_payment", "open", "assigned"].includes(b.status);
           const trackable = ["assigned", "in_progress"].includes(b.status);
           const canReview = b.status === "completed" && !reviewed.has(b.id);
+          const hoursUntilStart =
+            (new Date(`${b.scheduled_date}T${b.start_time}`).getTime() - Date.now()) / 3_600_000;
+          const reschedulable =
+            cancellable && hoursUntilStart > 24 && (b.reschedule_count ?? 0) < 1;
           return (
             <Card key={b.id} className="flex flex-col gap-3 p-5">
               <div className="flex items-center justify-between">
@@ -277,10 +305,52 @@ export default function CustomerBookingsPage() {
                 </Link>
               )}
 
-              {cancellable && (
-                <Button variant="danger" loading={busy === b.id} onClick={() => cancelBooking(b.id)}>
-                  Stornieren
-                </Button>
+              {reschedule?.id === b.id ? (
+                <div className="flex flex-col gap-2 rounded-xl border border-ink/10 p-3">
+                  <p className="text-sm font-bold text-ink">Neuen Termin wählen</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="date"
+                      min={new Date(Date.now() + 25 * 3600_000).toISOString().slice(0, 10)}
+                      value={reschedule.date}
+                      onChange={(e) => setReschedule((r) => r && { ...r, date: e.target.value })}
+                      className="min-h-11 rounded-xl border-2 border-ink/10 px-3 text-sm focus:border-brand focus:outline-none"
+                    />
+                    <select
+                      value={reschedule.time}
+                      onChange={(e) => setReschedule((r) => r && { ...r, time: e.target.value })}
+                      className="min-h-11 rounded-xl border-2 border-ink/10 px-3 text-sm focus:border-brand focus:outline-none"
+                    >
+                      {["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"].map((t) => (
+                        <option key={t} value={t}>{t}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button onClick={submitReschedule} loading={busy === b.id} disabled={!reschedule.date} className="flex-1">
+                      Bestätigen
+                    </Button>
+                    <Button variant="outline" onClick={() => setReschedule(null)} className="flex-1">
+                      Abbrechen
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {reschedulable && (
+                    <Button
+                      variant="outline"
+                      onClick={() => setReschedule({ id: b.id, date: "", time: "10:00" })}
+                    >
+                      Termin verschieben
+                    </Button>
+                  )}
+                  {cancellable && (
+                    <Button variant="danger" loading={busy === b.id} onClick={() => cancelBooking(b.id)}>
+                      Stornieren
+                    </Button>
+                  )}
+                </>
               )}
             </Card>
           );

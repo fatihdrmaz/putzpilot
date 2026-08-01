@@ -354,9 +354,15 @@ export default function Home() {
           </div>
           <div className="mt-8 flex flex-col items-start justify-between gap-2 border-t border-ink/10 pt-6 text-xs text-ink/40 sm:flex-row sm:items-center">
             <span>© {new Date().getFullYear()} PutzPilot · Köln</span>
-            <div className="flex gap-4">
-              <Link href="/login" className="font-semibold text-ink/60 hover:text-ink">
-                Anmelden
+            <div className="flex flex-wrap gap-4">
+              <Link href="/impressum" className="font-semibold text-ink/60 hover:text-ink">
+                Impressum
+              </Link>
+              <Link href="/datenschutz" className="font-semibold text-ink/60 hover:text-ink">
+                Datenschutz
+              </Link>
+              <Link href="/agb" className="font-semibold text-ink/60 hover:text-ink">
+                AGB
               </Link>
               <Link href="/register?rolle=cleaner" className="font-semibold text-ink/60 hover:text-ink">
                 Für Reinigungskräfte
