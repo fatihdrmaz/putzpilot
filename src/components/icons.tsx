@@ -145,3 +145,62 @@ export const IconLocate = (p: P) => (
     <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
   </svg>
 );
+export const IconMenu = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M4 7h16M4 12h16M4 17h16" />
+  </svg>
+);
+export const IconX = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M6 6l12 12M18 6L6 18" />
+  </svg>
+);
+export const IconArrowRight = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M4 12h16M14 6l6 6-6 6" />
+  </svg>
+);
+// "Was ist inklusive?" satırı için oda/iş ikonları
+export const IconBath = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M4 12V6a2 2 0 012-2 2 2 0 012 2M3 12h18v2a4 4 0 01-4 4H7a4 4 0 01-4-4v-2zM6 18l-1 2M18 18l1 2" />
+  </svg>
+);
+export const IconKitchen = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M7 2v8M5 2v4a2 2 0 002 2M9 2v4a2 2 0 01-2 2M7 10v12M16 2c-2 0-3 2-3 5s1 4 3 4 3-1 3-4-1-5-3-5zM16 11v11" />
+  </svg>
+);
+export const IconSofa = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M4 11V8a2 2 0 012-2h12a2 2 0 012 2v3M3 12a2 2 0 012 2v3h14v-3a2 2 0 012-2 2 2 0 012 2v4a1 1 0 01-1 1H2a1 1 0 01-1-1v-4a2 2 0 012-2zM6 18v2M18 18v2" />
+  </svg>
+);
+export const IconBed = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M3 8v11M3 12h18a2 2 0 012 2v5M21 19v-5M3 12V8a2 2 0 012-2h6a2 2 0 012 2v4" />
+  </svg>
+);
+export const IconWindow = (p: P) => (
+  <svg {...base(p)}>
+    <rect x="4" y="3" width="16" height="18" rx="1.5" />
+    <path d="M12 3v18M4 12h16" />
+  </svg>
+);
+export const IconIron = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M3 15v-2a5 5 0 015-5h9a4 4 0 014 4v3H3zM3 15v2a2 2 0 002 2M8 8V6a2 2 0 012-2h4" />
+  </svg>
+);
+export const IconFridge = (p: P) => (
+  <svg {...base(p)}>
+    <rect x="6" y="2" width="12" height="20" rx="2" />
+    <path d="M6 9h12M10 5v2M10 12v3" />
+  </svg>
+);
+export const IconOven = (p: P) => (
+  <svg {...base(p)}>
+    <rect x="3" y="3" width="18" height="18" rx="2" />
+    <path d="M3 9h18M7 6h.01M11 6h.01M7 13h10v5H7z" />
+  </svg>
+);
